@@ -1,8 +1,10 @@
-[phases.setup]
-nixPkgs = ["nodejs"]
-
+cat > nixpacks.toml << 'EOF'
 [phases.install]
-cmds = ["npm install"]
+cmds = ["npm install --prefix src/backend"]
+
+[phases.build]
+cmds = []
 
 [start]
 cmd = "node src/backend/server.js"
+EOF
