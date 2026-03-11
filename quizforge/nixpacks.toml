@@ -1,3 +1,4 @@
+cat > nixpacks.toml << 'EOF'
 [phases.setup]
 nixPkgs = ["nodejs"]
 
@@ -6,3 +7,4 @@ cmds = ["npm install"]
 
 [start]
 cmd = "node src/backend/server.js"
+EOF
