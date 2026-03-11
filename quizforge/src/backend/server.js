@@ -39,7 +39,7 @@ app.get('/api/health', (req, res) => {
 
 initSocketHandlers(io);
 
-if (process.env.NODE_ENV !== 'production') {
+if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 3001;
   httpServer.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
