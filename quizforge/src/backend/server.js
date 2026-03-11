@@ -39,7 +39,10 @@ app.get('/api/health', (req, res) => {
 
 initSocketHandlers(io);
 
-if (!process.env.VERCEL) {
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+
+if (process.argv[1] === __filename) {
   const PORT = process.env.PORT || 3001;
   httpServer.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
