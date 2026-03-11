@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api.js';
 
 const QUESTION_TYPES = [
   { value: 'mcq', label: 'Multiple Choice' },
@@ -36,7 +36,7 @@ export default function CreateQuizFromFile() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await axios.post('/api/quiz/extract-from-file', formData, {
+      const res = await api.post('/api/quiz/extract-from-file', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setQuestions(res.data.questions);
@@ -95,8 +95,8 @@ export default function CreateQuizFromFile() {
     }
     setStep('saving'); setError('');
     try {
-      const res = await axios.post('/api/quiz/save-from-file', { title: quizTitle, description: quizSubtitle, time_per_question: timePerQuestion, questions });
-      if (status === 'published') await axios.patch(`/api/quiz/${res.data.quiz.id}/publish`);
+      const res = await api.post('/api/quiz/save-from-file', { title: quizTitle, description: quizSubtitle, time_per_question: timePerQuestion, questions });
+      if (status === 'published') await api.patch(`/api/quiz/${res.data.quiz.id}/publish`);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to save quiz');
@@ -104,7 +104,6 @@ export default function CreateQuizFromFile() {
     }
   };
 
-  // ─── Upload ─────────────────────────────────────────────
   if (step === 'upload') {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--bg)' }}>
@@ -113,7 +112,7 @@ export default function CreateQuizFromFile() {
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4"
               style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)' }}>✨</div>
             <h1 className="text-3xl font-black" style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text)' }}>AI Quiz from File</h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--text-3)' }}>Upload any document — Gemini AI generates questions automatically</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--text-3)' }}>Upload any document — AI generates questions automatically</p>
           </div>
 
           <div className="card p-6">
@@ -121,17 +120,6 @@ export default function CreateQuizFromFile() {
               <div className="px-4 py-3 rounded-xl mb-4 text-sm"
                 style={{ background: 'var(--red-bg)', color: 'var(--red)', border: '1px solid var(--red-border)' }}>{error}</div>
             )}
-
-            <div className="px-4 py-3 rounded-xl mb-4 flex gap-3"
-              style={{ background: 'var(--accent-bg)', border: '1px solid var(--accent-border)' }}>
-              <span className="text-lg">🤖</span>
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--accent)', fontFamily: 'Sora, sans-serif' }}>Powered by Gemini AI</p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-2)' }}>
-                  Upload your notes or any document — AI will read it and generate MCQs automatically.
-                </p>
-              </div>
-            </div>
 
             <div className="flex gap-2 mb-4">
               {['📄 PDF', '📝 TXT', '📊 CSV'].map(f => (
@@ -181,7 +169,6 @@ export default function CreateQuizFromFile() {
     );
   }
 
-  // ─── Saving ──────────────────────────────────────────────
   if (step === 'saving') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
@@ -194,7 +181,6 @@ export default function CreateQuizFromFile() {
     );
   }
 
-  // ─── Edit ────────────────────────────────────────────────
   return (
     <div className="min-h-screen px-4 py-10 max-w-3xl mx-auto" style={{ background: 'var(--bg)' }}>
       <div className="flex items-center gap-3 mb-8">
@@ -212,7 +198,6 @@ export default function CreateQuizFromFile() {
           style={{ background: 'var(--red-bg)', color: 'var(--red)', border: '1px solid var(--red-border)' }}>{error}</div>
       )}
 
-      {/* Settings */}
       <div className="card p-5 mb-6">
         <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--text-3)', fontFamily: 'Sora, sans-serif' }}>
           Quiz Settings
@@ -230,7 +215,6 @@ export default function CreateQuizFromFile() {
         </div>
       </div>
 
-      {/* Questions */}
       <div className="space-y-3 mb-6">
         {questions.map((q, qIndex) => (
           <div key={qIndex} className="card overflow-hidden">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api.js';
 
 const defaultQuestion = () => ({
   question_text: '',
@@ -30,7 +30,7 @@ export default function CreateQuiz() {
 
   useEffect(() => {
     if (!isEditing) return;
-    axios.get(`/api/quiz/${id}`)
+    api.get(`/api/quiz/${id}`)
       .then(res => {
         const { quiz, questions: qs } = res.data;
         setTitle(quiz.title);
@@ -66,8 +66,8 @@ export default function CreateQuiz() {
 
   const saveQuiz = async (newStatus) => {
     const payload = { title, description, time_per_question: timePerQuestion, questions, status: newStatus };
-    if (isEditing) return (await axios.put(`/api/quiz/${id}`, payload)).data;
-    return (await axios.post('/api/quiz/create', payload)).data;
+    if (isEditing) return (await api.put(`/api/quiz/${id}`, payload)).data;
+    return (await api.post('/api/quiz/create', payload)).data;
   };
 
   const handleSaveDraft = async () => {

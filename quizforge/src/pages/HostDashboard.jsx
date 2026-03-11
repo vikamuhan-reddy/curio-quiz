@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { socket, connectSocket } from '../socket.js';
 
@@ -16,17 +16,13 @@ export default function HostDashboard() {
   const [answeredCount, setAnsweredCount] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
-
-  // Feature: Real-time participant count
   const [activeParticipantCount, setActiveParticipantCount] = useState(0);
-
-  // Feature: Auto-pause
   const [isPaused, setIsPaused] = useState(false);
   const [pauseReason, setPauseReason] = useState('');
   const [canResume, setCanResume] = useState(false);
 
   useEffect(() => {
-    axios.get('/api/quiz')
+    api.get('/api/quiz')
       .then(res => setQuizzes(res.data.quizzes))
       .finally(() => setLoading(false));
 
@@ -51,9 +47,7 @@ export default function HostDashboard() {
     socket.off('quiz:resumed');
 
     socket.on('host:lobby-ready', () => console.log('✅ Lobby ready'));
-    socket.on('lobby:update', ({ participants }) => {
-      setParticipants(participants);
-    });
+    socket.on('lobby:update', ({ participants }) => setParticipants(participants));
     socket.on('host:timer-tick', ({ secondsLeft }) => setTimerSeconds(secondsLeft));
     socket.on('host:answer-progress', ({ answered }) => setAnsweredCount(answered));
 
@@ -73,19 +67,16 @@ export default function HostDashboard() {
       setIsPaused(false); setActiveParticipantCount(0);
     });
 
-    // Feature: Real-time participant count
     socket.on('host:participant-count', ({ count, total }) => {
       setActiveParticipantCount(count);
     });
 
-    // Feature: Auto-pause when all disconnect
     socket.on('quiz:auto-paused', ({ reason }) => {
       setIsPaused(true);
       setPauseReason(reason);
       setCanResume(false);
     });
 
-    // Notify host they can resume
     socket.on('host:quiz-can-resume', ({ count }) => {
       setCanResume(true);
       setActiveParticipantCount(count);
@@ -113,7 +104,7 @@ export default function HostDashboard() {
           return;
         }
       }
-      const sessRes = await axios.post('/api/session/create', { quiz_id: quiz.id });
+      const sessRes = await api.post('/api/session/create', { quiz_id: quiz.id });
       const session = sessRes.data.session;
       const fullSession = { ...session, quiz };
       localStorage.setItem('activeSession', JSON.stringify(fullSession));
@@ -151,13 +142,13 @@ export default function HostDashboard() {
 
   const handleDelete = async (quizId) => {
     if (!confirm('Delete this quiz? This cannot be undone.')) return;
-    await axios.delete(`/api/quiz/${quizId}`);
+    await api.delete(`/api/quiz/${quizId}`);
     setQuizzes(prev => prev.filter(q => q.id !== quizId));
   };
 
   const handlePublish = async (quizId) => {
     try {
-      await axios.patch(`/api/quiz/${quizId}/publish`);
+      await api.patch(`/api/quiz/${quizId}/publish`);
       setQuizzes(prev => prev.map(q => q.id === quizId ? { ...q, status: 'published' } : q));
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to publish');
@@ -167,7 +158,7 @@ export default function HostDashboard() {
   const handleUnpublish = async (quizId) => {
     if (!confirm("Unpublish this quiz?")) return;
     try {
-      await axios.patch(`/api/quiz/${quizId}/unpublish`);
+      await api.patch(`/api/quiz/${quizId}/unpublish`);
       setQuizzes(prev => prev.map(q => q.id === quizId ? { ...q, status: 'draft' } : q));
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to unpublish');
@@ -183,7 +174,6 @@ export default function HostDashboard() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
 
-      {/* Nav */}
       <nav className="glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white text-sm"
@@ -198,7 +188,6 @@ export default function HostDashboard() {
 
       <div className="max-w-5xl mx-auto px-6 py-10">
 
-        {/* ── Active Session Banner ── */}
         {activeSession && (
           <div className="card p-6 mb-8 animate-scale-in"
             style={{
@@ -206,7 +195,6 @@ export default function HostDashboard() {
               borderWidth: 2
             }}>
 
-            {/* Auto-pause alert */}
             {isPaused && (
               <div className="flex items-center justify-between px-4 py-3 rounded-xl mb-5"
                 style={{ background: 'var(--yellow-bg)', border: '1.5px solid var(--yellow-border)' }}>
@@ -250,7 +238,6 @@ export default function HostDashboard() {
                 <p className="text-sm mt-1" style={{ color: 'var(--text-2)' }}>{activeSession?.quiz?.title}</p>
               </div>
 
-              {/* Real-time participant count */}
               <div className="text-right">
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-baseline gap-1">
@@ -356,7 +343,6 @@ export default function HostDashboard() {
           </div>
         )}
 
-        {/* ── Header ── */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-black" style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text)' }}>My Quizzes</h1>
           <div className="flex items-center gap-2">
@@ -381,7 +367,6 @@ export default function HostDashboard() {
           </div>
         ) : (
           <>
-            {/* ── Drafts ── */}
             {draftQuizzes.length > 0 && (
               <div className="mb-10">
                 <div className="flex items-center gap-2.5 mb-4">
@@ -418,7 +403,6 @@ export default function HostDashboard() {
               </div>
             )}
 
-            {/* ── Published ── */}
             {publishedQuizzes.length > 0 && (
               <div>
                 <div className="flex items-center gap-2.5 mb-4">

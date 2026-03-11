@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api.js';
 import { socket, connectSocket } from '../socket.js';
 
 const AVATAR_COLORS = [
@@ -32,10 +32,10 @@ export default function JoinQuiz() {
     setError('');
     setLoading(true);
     try {
-      const quizRes = await axios.get(`/api/quiz/pin/${pin.trim()}`);
+      const quizRes = await api.get(`/api/quiz/pin/${pin.trim()}`);
       const foundQuiz = quizRes.data.quiz;
       setQuiz(foundQuiz);
-      const sessRes = await axios.post('/api/session/create-public', { quiz_id: foundQuiz.id });
+      const sessRes = await api.post('/api/session/create-public', { quiz_id: foundQuiz.id });
       setSession(sessRes.data.session);
       setStep('nickname');
     } catch (err) {
@@ -95,7 +95,6 @@ export default function JoinQuiz() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--bg)' }}>
       <div className="w-full max-w-md">
 
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4"
             style={{ background: 'var(--accent-bg)', border: '1.5px solid var(--accent-border)' }}>🎮</div>
@@ -103,7 +102,6 @@ export default function JoinQuiz() {
           <p className="text-sm mt-1" style={{ color: 'var(--text-3)' }}>Enter the PIN from your host</p>
         </div>
 
-        {/* ─── PIN Step ─── */}
         {step === 'pin' && (
           <div className="card p-8 animate-scale-in">
             {error && (
@@ -133,7 +131,6 @@ export default function JoinQuiz() {
           </div>
         )}
 
-        {/* ─── Nickname Step ─── */}
         {step === 'nickname' && quiz && (
           <div className="card p-8 animate-scale-in">
             <div className="px-4 py-3 rounded-xl mb-6"
@@ -157,7 +154,6 @@ export default function JoinQuiz() {
                   className="input-field text-lg font-semibold" placeholder="e.g. QuizNinja" required />
               </div>
 
-              {/* Emoji Avatar Picker */}
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-2)', fontFamily: 'Sora, sans-serif' }}>
                   Pick your avatar
@@ -166,14 +162,11 @@ export default function JoinQuiz() {
                   {AVATAR_EMOJIS.map(emoji => (
                     <button key={emoji} type="button" onClick={() => setAvatarEmoji(emoji)}
                       className={`w-9 h-9 rounded-xl text-xl flex items-center justify-center transition-all ${
-                        avatarEmoji === emoji
-                          ? 'ring-2 ring-offset-1 scale-110'
-                          : 'hover:scale-105 opacity-60 hover:opacity-100'
+                        avatarEmoji === emoji ? 'ring-2 ring-offset-1 scale-110' : 'hover:scale-105 opacity-60 hover:opacity-100'
                       }`}
                       style={{
                         background: avatarEmoji === emoji ? 'var(--accent-bg)' : 'var(--bg-2)',
                         border: avatarEmoji === emoji ? '2px solid var(--accent)' : '1.5px solid var(--border)',
-                        ringColor: 'var(--accent)'
                       }}>
                       {emoji}
                     </button>
@@ -181,7 +174,6 @@ export default function JoinQuiz() {
                 </div>
               </div>
 
-              {/* Color picker */}
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-2)', fontFamily: 'Sora, sans-serif' }}>
                   Pick your colour
@@ -198,7 +190,6 @@ export default function JoinQuiz() {
                 </div>
               </div>
 
-              {/* Preview */}
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
                 style={{ background: 'var(--bg-2)', border: '1.5px solid var(--border)' }}>
                 <div style={{ backgroundColor: avatarColor }}
@@ -220,7 +211,6 @@ export default function JoinQuiz() {
           </div>
         )}
 
-        {/* ─── Lobby Step ─── */}
         {step === 'lobby' && (
           <div className="card p-8 animate-scale-in text-center">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4"

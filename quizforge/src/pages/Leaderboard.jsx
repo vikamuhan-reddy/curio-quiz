@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api.js';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
-const PODIUM_COLORS = ['#f59e0b', '#6366f1', '#10b981']; // gold, silver(indigo), bronze(emerald)
+const PODIUM_COLORS = ['#f59e0b', '#6366f1', '#10b981'];
 
-// ─── Bar chart for top 3 ──────────────────────────────────
 function ScoreBarChart({ players }) {
   const maxScore = Math.max(...players.map(p => Number(p.total_score)), 1);
 
@@ -18,17 +17,14 @@ function ScoreBarChart({ players }) {
       <div className="flex items-end justify-center gap-6">
         {players.map((p, i) => {
           const heightPct = (Number(p.total_score) / maxScore) * 100;
-          const barHeight = Math.max(heightPct * 1.2, 20); // px, min 20
+          const barHeight = Math.max(heightPct * 1.2, 20);
 
           return (
             <div key={i} className="flex flex-col items-center gap-2" style={{ minWidth: '72px' }}>
-              {/* Score label */}
               <span className="font-black text-sm tabular-nums"
                 style={{ fontFamily: 'DM Mono, monospace', color: PODIUM_COLORS[i] }}>
                 {p.total_score}
               </span>
-
-              {/* Bar */}
               <div className="relative w-14 rounded-t-xl overflow-hidden transition-all duration-700"
                 style={{
                   height: `${barHeight}px`,
@@ -36,7 +32,6 @@ function ScoreBarChart({ players }) {
                   border: `2px solid ${PODIUM_COLORS[i]}55`,
                   borderBottom: 'none',
                 }}>
-                {/* Animated fill */}
                 <div className="absolute bottom-0 left-0 right-0 rounded-t-xl"
                   style={{
                     height: '100%',
@@ -47,26 +42,19 @@ function ScoreBarChart({ players }) {
                     transformOrigin: 'bottom',
                   }} />
               </div>
-
-              {/* Avatar */}
               <div style={{ backgroundColor: p.avatar_color || PODIUM_COLORS[i] }}
                 className="w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-sm">
                 {p.avatar_emoji || p.nickname[0].toUpperCase()}
               </div>
-
-              {/* Name */}
               <span className="text-xs font-semibold text-center max-w-16 truncate"
                 style={{ color: 'var(--text-2)' }}>
                 {p.nickname}
               </span>
-
-              {/* Medal */}
               <span className="text-xl">{MEDALS[i]}</span>
             </div>
           );
         })}
       </div>
-
       <style>{`
         @keyframes bar-grow {
           from { transform: scaleY(0); }
@@ -77,7 +65,6 @@ function ScoreBarChart({ players }) {
   );
 }
 
-// ─── Suspense gate: show if < 5 questions done ────────────
 function SuspenseScreen() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6"
@@ -108,14 +95,13 @@ export default function Leaderboard() {
 
   useEffect(() => {
     if (!location.state?.leaderboard) {
-      axios.get(`/api/session/${sessionId}/leaderboard`)
+      api.get(`/api/session/${sessionId}/leaderboard`)
         .then(res => {
           setLeaderboard(res.data.leaderboard);
           setQuestionsCompleted(res.data.questions_completed ?? 999);
         })
         .finally(() => setLoading(false));
     } else {
-      // If passed via state, trust it as final leaderboard (quiz ended)
       if (questionsCompleted === null) setQuestionsCompleted(999);
     }
   }, [sessionId]);
@@ -127,28 +113,23 @@ export default function Leaderboard() {
     </div>
   );
 
-  // Feature: Gate leaderboard until 5 questions done
   if (questionsCompleted !== null && questionsCompleted < 5) {
     return <SuspenseScreen />;
   }
 
-  // Top 3 only for display
   const top3 = leaderboard.slice(0, 3);
 
   return (
     <div className="min-h-screen px-4 py-12 max-w-xl mx-auto" style={{ background: 'var(--bg)' }}>
 
-      {/* Header */}
       <div className="text-center mb-10 animate-fade-in">
         <div className="text-6xl mb-4">🏆</div>
         <h1 className="text-4xl font-black" style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text)' }}>Final Results</h1>
         <p className="text-sm mt-2" style={{ color: 'var(--text-3)' }}>Quiz complete! Here's the top 3.</p>
       </div>
 
-      {/* Score Bar Chart for top 3 */}
       {top3.length >= 2 && <ScoreBarChart players={top3} />}
 
-      {/* Podium */}
       {top3.length >= 3 && (
         <div className="flex items-end justify-center gap-4 mb-8 animate-slide-up">
           {[top3[1], top3[0], top3[2]].map((p, pos) => {
@@ -182,7 +163,6 @@ export default function Leaderboard() {
         </div>
       )}
 
-      {/* Top 3 full cards */}
       <div className="space-y-2.5 mb-8">
         {top3.map((p, i) => (
           <div key={i}
@@ -213,7 +193,6 @@ export default function Leaderboard() {
         ))}
       </div>
 
-      {/* Remaining players note */}
       {leaderboard.length > 3 && (
         <p className="text-center text-sm mb-6" style={{ color: 'var(--text-3)' }}>
           + {leaderboard.length - 3} more player{leaderboard.length - 3 !== 1 ? 's' : ''} competed
