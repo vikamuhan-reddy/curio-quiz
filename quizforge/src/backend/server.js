@@ -1,9 +1,11 @@
 import dotenv from 'dotenv';
 dotenv.config();
+
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+
 import authRoutes from './routes/auth.js';
 import quizRoutes from './routes/quiz.js';
 import sessionRoutes from './routes/session.js';
@@ -37,16 +39,10 @@ app.get('/api/health', (req, res) => {
 
 initSocketHandlers(io);
 
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-
-initSocketHandlers(io);
-
 const PORT = process.env.PORT || 3001;
 
 httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
 
 export default app;
