@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Register() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
-  const [role, setRole] = useState('player');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -18,8 +17,8 @@ export default function Register() {
     if (form.password.length < 6) { setError('Password must be at least 6 characters'); return; }
     setLoading(true);
     try {
-      const user = await register(form.username, form.email, form.password, role);
-      navigate(user.role === 'host' ? '/dashboard' : '/join');
+      await register(form.username, form.email, form.password);
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
@@ -34,7 +33,7 @@ export default function Register() {
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-white text-xl mx-auto mb-4"
             style={{ background: 'var(--accent)', fontFamily: 'Sora, sans-serif' }}>C</div>
           <h1 className="text-2xl font-bold" style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text)' }}>Create your account</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-3)' }}>Join Curio Quiz</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-3)' }}>Start hosting quizzes for free</p>
         </div>
 
         <div className="card p-8">
@@ -44,40 +43,6 @@ export default function Register() {
               {error}
             </div>
           )}
-
-          {/* ── Role Selector ── */}
-          <div className="mb-5">
-            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-2)', fontFamily: 'Sora, sans-serif' }}>
-              I want to...
-            </label>
-            <div className="flex gap-2">
-              <button type="button" onClick={() => setRole('host')}
-                className="flex-1 py-3 px-3 rounded-xl text-sm font-semibold transition-all text-center"
-                style={{
-                  background: role === 'host' ? 'var(--accent)' : 'var(--surface)',
-                  color: role === 'host' ? '#fff' : 'var(--text-2)',
-                  border: `1.5px solid ${role === 'host' ? 'var(--accent)' : 'var(--border)'}`,
-                  fontFamily: 'Sora, sans-serif'
-                }}>
-                🎤 Host Quizzes
-              </button>
-              <button type="button" onClick={() => setRole('player')}
-                className="flex-1 py-3 px-3 rounded-xl text-sm font-semibold transition-all text-center"
-                style={{
-                  background: role === 'player' ? 'var(--accent)' : 'var(--surface)',
-                  color: role === 'player' ? '#fff' : 'var(--text-2)',
-                  border: `1.5px solid ${role === 'player' ? 'var(--accent)' : 'var(--border)'}`,
-                  fontFamily: 'Sora, sans-serif'
-                }}>
-                🎮 Play Quizzes
-              </button>
-            </div>
-            <p className="text-xs mt-2" style={{ color: 'var(--text-3)' }}>
-              {role === 'host'
-                ? '✅ You can create, manage and host live quiz sessions'
-                : '✅ You can join live quiz sessions using a PIN'}
-            </p>
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {[
