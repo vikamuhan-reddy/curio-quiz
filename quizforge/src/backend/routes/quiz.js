@@ -3,10 +3,11 @@ import multer from 'multer';
 import fs from 'fs';
 import { execSync } from 'child_process';
 import { query } from '../db/index.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 const upload = multer({ dest: '/tmp/' });
+const hostOnly = [authenticateToken, requireRole('host')];
 
 const generatePin = () => Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -103,7 +104,7 @@ Return ONLY the JSON array, nothing else.`
 }
 
 // ─── EXTRACT FROM FILE (AI-powered) ──────────────────────
-router.post('/extract-from-file', authenticateToken, upload.single('file'), async (req, res) => {
+router.post('/extract-from-file', ...hostOnly, upload.single('file'), async (req, res) => {
   const filePath = req.file?.path;
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -135,7 +136,7 @@ router.post('/extract-from-file', authenticateToken, upload.single('file'), asyn
 });
 
 // ─── SAVE FROM FILE ───────────────────────────────────────
-router.post('/save-from-file', authenticateToken, async (req, res) => {
+router.post('/save-from-file', ...hostOnly, async (req, res) => {
   try {
     const { title, description, time_per_question, questions } = req.body;
     if (!title) return res.status(400).json({ error: 'Quiz title is required' });
@@ -171,7 +172,7 @@ router.post('/save-from-file', authenticateToken, async (req, res) => {
 });
 
 // ─── CREATE ───────────────────────────────────────────────
-router.post('/create', authenticateToken, async (req, res) => {
+router.post('/create', ...hostOnly, async (req, res) => {
   try {
     const { title, subtitle, time_per_question, status = 'draft', questions } = req.body;
     if (!title || !questions?.length) return res.status(400).json({ error: 'Title and questions are required' });
@@ -206,7 +207,7 @@ router.post('/create', authenticateToken, async (req, res) => {
 });
 
 // ─── UPDATE ───────────────────────────────────────────────
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', ...hostOnly, async (req, res) => {
   try {
     const { title, subtitle, time_per_question, questions } = req.body;
     await query('UPDATE quizzes SET title=$1, subtitle=$2, time_per_question=$3 WHERE id=$4 AND host_id=$5',
@@ -230,7 +231,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 });
 
 // ─── PUBLISH ──────────────────────────────────────────────
-router.patch('/:id/publish', authenticateToken, async (req, res) => {
+router.patch('/:id/publish', ...hostOnly, async (req, res) => {
   try {
     const result = await query(
       'UPDATE quizzes SET status=$1 WHERE id=$2 AND host_id=$3 RETURNING *',
@@ -244,7 +245,7 @@ router.patch('/:id/publish', authenticateToken, async (req, res) => {
 });
 
 // ─── UNPUBLISH ────────────────────────────────────────────
-router.patch('/:id/unpublish', authenticateToken, async (req, res) => {
+router.patch('/:id/unpublish', ...hostOnly, async (req, res) => {
   try {
     const result = await query(
       'UPDATE quizzes SET status=$1 WHERE id=$2 AND host_id=$3 RETURNING *',
@@ -269,7 +270,7 @@ router.get('/pin/:pin', async (req, res) => {
 });
 
 // ─── GET ONE ──────────────────────────────────────────────
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', ...hostOnly, async (req, res) => {
   try {
     const quizResult = await query('SELECT * FROM quizzes WHERE id=$1 AND host_id=$2', [req.params.id, req.user.id]);
     if (quizResult.rows.length === 0) return res.status(404).json({ error: 'Quiz not found' });
@@ -281,7 +282,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 });
 
 // ─── GET ALL ──────────────────────────────────────────────
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', ...hostOnly, async (req, res) => {
   try {
     const result = await query('SELECT * FROM quizzes WHERE host_id=$1 ORDER BY created_at DESC', [req.user.id]);
     res.json({ quizzes: result.rows });
@@ -291,7 +292,7 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // ─── DELETE ───────────────────────────────────────────────
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', ...hostOnly, async (req, res) => {
   try {
     await query('DELETE FROM quizzes WHERE id=$1 AND host_id=$2', [req.params.id, req.user.id]);
     res.json({ success: true });

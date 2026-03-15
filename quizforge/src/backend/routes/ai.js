@@ -1,10 +1,11 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
+const hostOnly = [authenticateToken, requireRole('host')];
 
 // ─── GENERATE QUIZ FROM TOPIC ─────────────────────────────
-router.post('/generate', authenticateToken, async (req, res) => {
+router.post('/generate', hostOnly, async (req, res) => {
   const { topic, numQuestions = 10, difficulty = 'medium' } = req.body;
 
   if (!topic || !topic.trim()) {
