@@ -8,6 +8,7 @@ import HostDashboard from './pages/HostDashboard.jsx';
 import CreateQuiz from './pages/CreateQuiz.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import VerifyOTP from './pages/VerifyOTP.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import CreateQuizFromFile from './pages/CreateQuizFromFile.jsx';
 import CreateQuizAI from './pages/CreateQuizAI.jsx';
@@ -25,29 +26,30 @@ const ProtectedRoute = ({ children }) => {
 function AppRoutes() {
   return (
     <Routes>
-  <Route path="/" element={<Landing />} />
-  <Route path="/join" element={<JoinQuiz />} />
-  <Route path="/play/:sessionId" element={<QuizPlayer />} />
-  <Route path="/leaderboard/:sessionId" element={<Leaderboard />} />
-  <Route path="/login" element={<Login />} />
-  <Route path="/register" element={<Register />} />
-  <Route path="/dashboard" element={
-    <ProtectedRoute><HostDashboard /></ProtectedRoute>
-  } />
-  <Route path="/quiz/create" element={
-    <ProtectedRoute><CreateQuiz /></ProtectedRoute>
-  } />
-  <Route path="/quiz/edit/:id" element={
-    <ProtectedRoute><CreateQuiz /></ProtectedRoute>
-  } />
-  <Route path="/quiz/from-file" element={
-    <ProtectedRoute><CreateQuizFromFile /></ProtectedRoute>
-  } />
-  <Route path="/quiz/ai" element={
-  <ProtectedRoute><CreateQuizAI /></ProtectedRoute>
-} />
-  <Route path="*" element={<Navigate to="/" replace />} />
-</Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/join" element={<JoinQuiz />} />
+      <Route path="/play/:sessionId" element={<QuizPlayer />} />
+      <Route path="/leaderboard/:sessionId" element={<Leaderboard />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/verify-otp" element={<VerifyOTP />} />
+      <Route path="/dashboard" element={
+        <ProtectedRoute><HostDashboard /></ProtectedRoute>
+      } />
+      <Route path="/quiz/create" element={
+        <ProtectedRoute><CreateQuiz /></ProtectedRoute>
+      } />
+      <Route path="/quiz/edit/:id" element={
+        <ProtectedRoute><CreateQuiz /></ProtectedRoute>
+      } />
+      <Route path="/quiz/from-file" element={
+        <ProtectedRoute><CreateQuizFromFile /></ProtectedRoute>
+      } />
+      <Route path="/quiz/ai" element={
+        <ProtectedRoute><CreateQuizAI /></ProtectedRoute>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

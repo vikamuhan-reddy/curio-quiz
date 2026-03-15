@@ -27,12 +27,10 @@ export const AuthProvider = ({ children }) => {
     return user;
   };
 
+  // register no longer returns a token — just sends verification email
   const register = async (username, email, password) => {
-    const res = await api.post('/api/auth/register', { username, email, password });
-    const { token, user } = res.data;
-    localStorage.setItem('token', token);
-    setUser(user);
-    return user;
+    await api.post('/api/auth/register', { username, email, password });
+    // no token stored — user must verify email first
   };
 
   const logout = () => {
