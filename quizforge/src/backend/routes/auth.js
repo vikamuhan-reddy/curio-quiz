@@ -4,7 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 
 const router = express.Router();
 
-const supabase = createClient(
+// ✅ Lazy init — reads env vars at request time, not module load time
+const getSupabase = () => createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
@@ -28,7 +29,7 @@ router.post('/register', authLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await getSupabase().auth.signUp({
       email,
       password,
       options: {
@@ -61,7 +62,7 @@ router.post('/login', authLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await getSupabase().auth.signInWithPassword({ email, password });
 
     if (error) {
       if (error.message.includes('Email not confirmed')) {
@@ -77,12 +78,7 @@ router.post('/login', authLimiter, async (req, res) => {
 
     res.json({
       token,
-      user: {
-        id: supabaseUser.id,
-        email: supabaseUser.email,
-        username,
-        role,
-      }
+      user: { id: supabaseUser.id, email: supabaseUser.email, username, role }
     });
   } catch (err) {
     console.error('POST /login error:', err.message);
@@ -97,7 +93,7 @@ router.get('/me', async (req, res) => {
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token' });
 
-    const { data, error } = await supabase.auth.getUser(token);
+    const { data, error } = await getSupabase().auth.getUser(token);
     if (error || !data.user) return res.status(403).json({ error: 'Invalid token' });
 
     const supabaseUser = data.user;
@@ -123,7 +119,7 @@ router.get('/me', async (req, res) => {
 router.post('/verify-otp', async (req, res) => {
   try {
     const { email, token } = req.body;
-    const { data, error } = await supabase.auth.verifyOtp({
+    const { data, error } = await getSupabase().auth.verifyOtp({
       email,
       token,
       type: 'email',
@@ -149,7 +145,7 @@ router.post('/verify-otp', async (req, res) => {
 router.post('/resend-otp', async (req, res) => {
   try {
     const { email } = req.body;
-    const { error } = await supabase.auth.resend({
+    const { error } = await getSupabase().auth.resend({
       type: 'signup',
       email,
     });
