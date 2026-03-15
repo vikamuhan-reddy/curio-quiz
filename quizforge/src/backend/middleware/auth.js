@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
+// ✅ Lazy init — reads env vars at request time, not module load time
+const getSupabase = () => createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
@@ -11,7 +12,7 @@ export const authenticateToken = async (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Access token required' });
 
-  const { data, error } = await supabase.auth.getUser(token);
+  const { data, error } = await getSupabase().auth.getUser(token);
   if (error || !data.user) return res.status(403).json({ error: 'Invalid or expired token' });
 
   const supabaseUser = data.user;
@@ -21,7 +22,6 @@ export const authenticateToken = async (req, res, next) => {
     username: supabaseUser.user_metadata?.username || supabaseUser.email.split('@')[0],
     role: supabaseUser.user_metadata?.role || 'host',
   };
-
   next();
 };
 
