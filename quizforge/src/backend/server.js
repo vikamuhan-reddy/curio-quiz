@@ -19,6 +19,7 @@ const httpServer = createServer(app);
 const allowedOrigins = [
   process.env.CLIENT_URL,
   process.env.CLIENT_URL_WWW,
+  'https://13.232.44.169.nip.io',
   'http://localhost:5173',
   'http://localhost:4173',
 ].filter(Boolean);
@@ -56,6 +57,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // preflight
 
 app.use(express.json({ limit: '10mb' }));
+app.set('trust proxy', 1);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/quiz', quizRoutes);
