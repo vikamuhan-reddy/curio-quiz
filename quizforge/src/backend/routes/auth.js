@@ -37,7 +37,7 @@ router.post('/register', authLimiter, async (req, res) => {
     const hash = await bcrypt.hash(password, 12);
     const result = await query(
   'INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, username, email, role',
-  [username, email, hash, 'player']
+  [username, email, hash, role]
 );
 const user = result.rows[0];
 const token = jwt.sign(
