@@ -5,7 +5,8 @@ import api from '../api.js';
 export default function VerifyOTP() {
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email || '';
+  const query = new URLSearchParams(location.search);
+  const email = location.state?.email || query.get("email") || "";
 
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');

@@ -32,6 +32,7 @@ function AppRoutes() {
       <Route path="/leaderboard/:sessionId" element={<Leaderboard />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/auth/callback" element={<VerifyOTP />} />
       <Route path="/verify-otp" element={<VerifyOTP />} />
       <Route path="/dashboard" element={
         <ProtectedRoute><HostDashboard /></ProtectedRoute>
