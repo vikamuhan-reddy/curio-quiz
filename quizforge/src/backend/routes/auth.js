@@ -4,7 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 
 const router = express.Router();
 
-// ✅ Lazy init — reads env vars at request time, not module load time
 const getSupabase = () => createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -22,25 +21,23 @@ const authLimiter = rateLimit({
 router.post('/register', authLimiter, async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    if (!username || !email || !password) {
+    if (!username || !email || !password)
       return res.status(400).json({ error: 'All fields required' });
-    }
-    if (password.length < 6) {
+    if (password.length < 6)
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
 
     const { data, error } = await getSupabase().auth.signUp({
       email,
       password,
       options: {
         data: { username, role: 'host' },
+        emailRedirectTo: `${process.env.CLIENT_URL}/login`,
       }
     });
 
     if (error) {
-      if (error.message.includes('already registered')) {
+      if (error.message.includes('already registered'))
         return res.status(409).json({ error: 'Email already exists' });
-      }
       return res.status(400).json({ error: error.message });
     }
 
@@ -58,16 +55,14 @@ router.post('/register', authLimiter, async (req, res) => {
 router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
+    if (!email || !password)
       return res.status(400).json({ error: 'Email and password required' });
-    }
 
     const { data, error } = await getSupabase().auth.signInWithPassword({ email, password });
 
     if (error) {
-      if (error.message.includes('Email not confirmed')) {
+      if (error.message.includes('Email not confirmed'))
         return res.status(401).json({ error: 'Please verify your email before logging in.' });
-      }
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -112,48 +107,6 @@ router.get('/me', async (req, res) => {
   } catch (err) {
     console.error('GET /me error:', err.message);
     res.status(403).json({ error: 'Invalid token' });
-  }
-});
-
-// ─── POST /api/auth/verify-otp ────────────────────────────
-router.post('/verify-otp', async (req, res) => {
-  try {
-    const { email, token } = req.body;
-    const { data, error } = await getSupabase().auth.verifyOtp({
-      email,
-      token,
-      type: 'email',
-    });
-    if (error) return res.status(400).json({ error: 'Invalid or expired code' });
-
-    const supabaseUser = data.user;
-    const accessToken = data.session.access_token;
-    const username = supabaseUser.user_metadata?.username || supabaseUser.email.split('@')[0];
-    const role = supabaseUser.user_metadata?.role || 'host';
-
-    res.json({
-      token: accessToken,
-      user: { id: supabaseUser.id, email: supabaseUser.email, username, role }
-    });
-  } catch (err) {
-    console.error('POST /verify-otp error:', err.message);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// ─── POST /api/auth/resend-otp ────────────────────────────
-router.post('/resend-otp', async (req, res) => {
-  try {
-    const { email } = req.body;
-    const { error } = await getSupabase().auth.resend({
-      type: 'signup',
-      email,
-    });
-    if (error) return res.status(400).json({ error: error.message });
-    res.json({ message: 'Verification email resent' });
-  } catch (err) {
-    console.error('POST /resend-otp error:', err.message);
-    res.status(500).json({ error: 'Server error' });
   }
 });
 
