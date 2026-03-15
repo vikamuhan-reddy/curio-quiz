@@ -10,6 +10,7 @@ import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import CreateQuizFromFile from './pages/CreateQuizFromFile.jsx';
+import CreateQuizAI from './pages/CreateQuizAI.jsx';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -42,6 +43,9 @@ function AppRoutes() {
   <Route path="/quiz/from-file" element={
     <ProtectedRoute><CreateQuizFromFile /></ProtectedRoute>
   } />
+  <Route path="/quiz/ai" element={
+  <ProtectedRoute><CreateQuizAI /></ProtectedRoute>
+} />
   <Route path="*" element={<Navigate to="/" replace />} />
 </Routes>
   );

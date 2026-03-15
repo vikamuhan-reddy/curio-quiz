@@ -343,16 +343,18 @@ export default function HostDashboard() {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-black" style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text)' }}>My Quizzes</h1>
-          <div className="flex items-center gap-2">
-            <button onClick={() => navigate('/quiz/from-file')} className="btn-secondary text-sm px-4 py-2.5">
-              📄 From File
-            </button>
-            <Link to="/quiz/create" className="btn-primary text-sm px-4 py-2.5">+ Create Quiz</Link>
-          </div>
-        </div>
-
+       <div className="flex items-center justify-between mb-8">
+  <h1 className="text-3xl font-black" style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text)' }}>My Quizzes</h1>
+  <div className="flex items-center gap-2">
+    <button onClick={() => navigate('/quiz/from-file')} className="btn-secondary text-sm px-4 py-2.5">
+      📄 From File
+    </button>
+    <button onClick={() => navigate('/quiz/ai')} className="btn-secondary text-sm px-4 py-2.5">
+      ✨ AI Generate
+    </button>
+    <Link to="/quiz/create" className="btn-primary text-sm px-4 py-2.5">+ Create Quiz</Link>
+  </div>
+</div>
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"

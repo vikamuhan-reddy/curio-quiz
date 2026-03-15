@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.js';
 import quizRoutes from './routes/quiz.js';
 import sessionRoutes from './routes/session.js';
 import { initSocketHandlers } from './socket/handlers.js';
+import aiRoutes from './routes/ai.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -59,6 +60,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/session', sessionRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
