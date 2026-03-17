@@ -12,6 +12,7 @@ import VerifyOTP from './pages/VerifyOTP.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import CreateQuizFromFile from './pages/CreateQuizFromFile.jsx';
 import CreateQuizAI from './pages/CreateQuizAI.jsx';
+import PinGate from './components/PinGate';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -31,7 +32,11 @@ function AppRoutes() {
       <Route path="/play/:sessionId" element={<QuizPlayer />} />
       <Route path="/leaderboard/:sessionId" element={<Leaderboard />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/register" element={
+  <PinGate>
+    <Register />
+  </PinGate>
+} />
       <Route path="/auth/callback" element={<VerifyOTP />} />
       <Route path="/verify-otp" element={<VerifyOTP />} />
       <Route path="/dashboard" element={
